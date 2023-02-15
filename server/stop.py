@@ -5,7 +5,7 @@ if os.path.exists("./log"):
     with open("log",'rb') as file:
         import pickle
         try:
-            PID=pickle.load(file)
+            PID=int(str(pickle.load(file)).split("%")[0])
             os.kill(PID, signal.SIGKILL)
             os.remove("./log")
         except:
