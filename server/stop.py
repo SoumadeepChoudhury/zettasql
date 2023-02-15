@@ -1,4 +1,6 @@
 import signal
+import subprocess
+import platform
 import os
 PID=0
 if os.path.exists("./.log"):
@@ -6,7 +8,10 @@ if os.path.exists("./.log"):
         import pickle
         try:
             PID=int(str(pickle.load(file)).split("%")[0])
-            os.kill(PID, signal.SIGKILL)
+            if platform.system() != 'Windows':
+                os.kill(PID, signal.SIGKILL)
+            else:
+                subprocess.call(['taskkill', '/F', '/T', '/PID', str(PID)])
             os.remove("./.log")
         except:
             print("Unable to stop ZettaSQL server.")
