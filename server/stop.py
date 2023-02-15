@@ -11,7 +11,8 @@ if os.path.exists("./.log"):
             if platform.system() != 'Windows':
                 os.kill(PID, signal.SIGKILL)
             else:
-                subprocess.call(['taskkill', '/F', '/T', '/PID', str(PID)])
+                subprocess.call(['taskkill', '/F', '/T', '/PID', str(PID)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            file.close()
             os.remove("./.log")
         except:
             print("Unable to stop ZettaSQL server.")
