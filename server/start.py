@@ -1,24 +1,25 @@
 import subprocess
 import platform
 import os
-pid = 0
+PID = 0
 process=None
 if not os.path.exists("./log"):
     try:
         if platform.system() in ("Darwin","Linux"):
             process=subprocess.Popen(["python3","-m","http.server"],stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-            pid=process.pid
+            PID =process.pid
         elif platform.system() == 'Windows':
-            process=subprocess.Popen(["python", "-m", "http.server"],shell=True)
-            pid=process.pid
+            with open(os.devnull,'w') as nullVal:
+                process=subprocess.Popen(["python", "-m", "http.server"],stdout=nullVal,stderr=nullVal)
+                PID =process.pid
     except Exception as e:
         print(f"Error {e.args[0]}. Unable to connect to ZettaSQL serer.")
 
-    if pid!=0:
+    if PID != 0:
         with open("log",'wb') as file:
             import pickle
             try:
-                pickle.dump(pid,file)
+                pickle.dump(PID,file)
             except:
                 print('Unable to connect to ZettaSQL server.')
                 process.terminate()
