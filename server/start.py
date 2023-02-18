@@ -2,6 +2,7 @@ import subprocess
 import platform
 import os
 import random
+import pickle
 if not os.path.exists(".NULL"):
     os.mkdir(".NULL")
 PID = 0
@@ -9,6 +10,13 @@ process=None
 PORT = str(random.randint(0,65336))
 if not os.path.exists("./.log"):
     try:
+        if not os.path.exists("./.config"):
+            with open("./.config",'wb') as file:
+                from getpass import getpass
+                print("[*] Create root User")
+                username=input("[*] Enter root username: ")
+                password=getpass("[*] Enter root password: ")
+                pickle.dump({'username@admin':username,'password@admin':password},file)
         if platform.system() in ("Darwin","Linux"):
             process=subprocess.Popen(["python3","-m","http.server",PORT,"--directory",".NULL"],stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
             PID =process.pid
@@ -21,7 +29,6 @@ if not os.path.exists("./.log"):
 
     if PID != 0:
         with open(".log",'wb') as file:
-            import pickle
             try:
                 data=str(PID)+"%"+str(PORT)
                 pickle.dump(data,file)

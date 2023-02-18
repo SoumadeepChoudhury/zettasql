@@ -14,6 +14,13 @@ if os.path.exists("./.log"):
                 subprocess.call(['taskkill', '/F', '/T', '/PID', str(PID)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
             file.close()
             os.remove("./.log")
+            try:
+                with open("../client/info.log",'r+') as file:
+                    data=''.join(file.readlines()[:-1])
+                    file.truncate(0)
+                    file.write(data)
+            except:
+                pass
         except:
             print("Unable to stop ZettaSQL server.")
 else:
