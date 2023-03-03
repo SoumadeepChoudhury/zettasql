@@ -131,3 +131,5 @@ dmypy.json
 .log
 .config
 info.log
+ERRORLOG
+databases
