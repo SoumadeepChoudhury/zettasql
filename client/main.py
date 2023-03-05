@@ -2,10 +2,11 @@ from HelperModule import *
 import re
 import readline
 
-FILE: object = None
-DATABASE_NAME: str = None
+FILE: object = None             # Holds the database file object
+DATABASE_NAME: str = None       # Holds the database name
+# Flag for if table is displayed (displayTable is called)
 TABLE_DISPLAYED: bool = False
-ERROR: bool = False
+ERROR: bool = False             # Flag for any error
 
 
 def use_Database(cmd: str):
