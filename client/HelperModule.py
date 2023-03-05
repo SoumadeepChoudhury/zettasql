@@ -7,7 +7,7 @@ def parser(file: object, handle: str) -> list:
     return data
 
 
-def displayTable(field: list = None, records: list = None):
+def displayTable(field: list = None, records: list = None, sep: str = None):
     '''Display the output in tablular format'''
     maxLength = []  # To determine the maximum length/width of each field/column
     for i in range(len(field)):  # Finding maxlength for each fields
@@ -31,8 +31,13 @@ def displayTable(field: list = None, records: list = None):
             if i == 0:
                 print(f"{field[j]:^{maxLength[j]}}|", end='')
             else:
-                print(f"{records[i-1][j]:^{maxLength[j]}}|", end='')
+                if sep != None:
+                    print(
+                        f"{records[i-1][j].replace(sep,''):^{maxLength[j]}}|", end='')
+                else:
+                    print(
+                        f"{records[i-1][j]:^{maxLength[j]}}|", end='')
         print()
         if i == 0 or i == len(records):
             print(outliner)
-    print(f"{len(records)} rows in set\n")
+    print(f"{len(records)} rows in set ", end='')
