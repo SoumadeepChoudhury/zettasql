@@ -248,5 +248,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # displayTable(field=["Name","ID","Phone"],records=[["Soumadeep Choudhury",12,23456],["Sneha Ganguly","156",45678]])
-    # displayTable(field=["Name"],records=[["Soumadeep"]])
+   
+    
