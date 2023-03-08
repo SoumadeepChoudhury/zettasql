@@ -1,17 +1,15 @@
 from HelperModule import *
 import re
-import readline
 
 FILE: object = None             # Holds the database file object
 DATABASE_NAME: str = None       # Holds the database name
-# Flag for if table is displayed (displayTable is called)
-TABLE_DISPLAYED: bool = False
+TABLE_DISPLAYED: bool = False   # Flag for if table is displayed
 ERROR: bool = False             # Flag for any error
 
 
 def use_Database(cmd: str):
     global ERROR
-    if re.fullmatch(r"^use ([\S]*);$", cmd):
+    if re.fullmatch(r"^use (\S*);$", cmd):
         file: str = cmd.replace("use ", "").strip().replace(";", "").strip()
         global FILE, DATABASE_NAME
         try:
@@ -23,7 +21,7 @@ def use_Database(cmd: str):
             print(f"ERROR 1020: Unknown database '{file}' ")
     else:
         ERROR = True
-        bug: list = re.split(r'^use ([\S]*);$', cmd)
+        bug: list = re.split(r'^use (\S*);$', cmd)
         print(
             f"ERROR 1011: Syntax Error in ZettaSQL Commands near \'{bug[0].strip()}\'.")
 
@@ -31,7 +29,7 @@ def use_Database(cmd: str):
 def create_Database(cmd: str):
     present: bool = False
     global ERROR
-    if re.fullmatch(r"^create database ([\S]*);$", cmd) or re.fullmatch(r"^create database if not exists ([\S]*);$", cmd):
+    if re.fullmatch(r"^create database (\S*);$", cmd) or re.fullmatch(r"^create database if not exists ([\S]*);$", cmd):
         if "if not exists" in cmd:
             present = True
         # Getting the file (database) Name
@@ -49,7 +47,7 @@ def create_Database(cmd: str):
     else:
         ERROR = True
         bug: list = re.split(
-            r'^create database ([\S]*);$' if not present else r'^create database if not exists ([\S]*);$', cmd)
+            r'^create database (\S*);$' if not present else r'^create database if not exists (\S*);$', cmd)
         print(
             f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
@@ -95,8 +93,32 @@ def show_Tables(cmd: str):
             f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
 
+def create_Table(cmd: str):
+    global ERROR
+    # TODO : Define the datatypes
+    if re.fullmatch(r"^create table (\w+\s?\((\S{1,}\s\S{1,},?\s*)+\));$", cmd):
+        cmd = str(
+            (cmd.replace("create table ", "").strip()).replace(";", ""))
+        items: list = cmd[
+            cmd.find("(")+1:cmd.rfind(")")].split(",")
+        for item in items:
+            if re.fullmatch("^\S+\s\S+(\s*(\(?)([1-9]+)(\)?))?$", item) and validParenthesis(item):
+                # TODO : check datatypes and write the table in the file
+                pass
+            else:
+                ERROR = True
+                print(
+                    f"ERROR 1011: Syntax Error in ZettaSQL command near '{item}'")
+                break
+    else:
+        ERROR = True
+        bug: list = re.split(r'^create table (\S*)\(\S* \S*\);$', cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
+
+
 COMMANDS: dict = {"use": use_Database, "create database": create_Database,
-                  "show databases": show_Database, "show tables": show_Tables}
+                  "show databases": show_Database, "show tables": show_Tables, "create table": create_Table}
 
 
 def main():
@@ -105,6 +127,8 @@ def main():
         import sys
         import os
         import signal
+        import readline
+
         global TABLE_DISPLAYED, COMMANDS, ERROR
 
         flag: bool = False

@@ -41,3 +41,23 @@ def displayTable(field: list = None, records: list = None, sep: str = None):
         if i == 0 or i == len(records):
             print(outliner)
     print(f"{len(records)} rows in set ", end='')
+
+
+def validParenthesis(userInput: str):
+    if "{" in userInput or "}" in userInput or '[' in userInput or ']' in userInput:
+        return False
+    listStack = []
+    res = True
+    for i in userInput:
+        if i in '(':
+            listStack.append(i)
+        if i in ')':
+            if '(' in listStack:
+                listStack.pop()
+                break
+            else:
+                res = False
+                break
+    if listStack == [] and len(userInput) >= 2 and res:
+        return True
+    return False

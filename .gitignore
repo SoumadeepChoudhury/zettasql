@@ -133,3 +133,4 @@ dmypy.json
 info.log
 ERRORLOG
 databases
+.vscode/extensions.json
