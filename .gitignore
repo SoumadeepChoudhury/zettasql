@@ -134,3 +134,4 @@ info.log
 ERRORLOG
 databases
 .vscode/extensions.json
+.vscode/launch.json

@@ -61,3 +61,76 @@ def validParenthesis(userInput: str):
     if listStack == [] and len(userInput) >= 2 and res:
         return True
     return False
+
+
+def isValidEntry(entry: str, datatype: str, length: int = None):
+    pass
+
+
+def getData(file: object):
+    file = open("./databases/test.zdb", 'rb')
+    data = []
+    import pickle
+    file.seek(0)
+    while True:
+        try:
+            data.append(str(pickle.load(file)))
+        except:
+            break
+    return data
+
+
+def time(inner_func):
+    import time
+
+    def wrapped_func(*args, **kwargs):
+        start = time.time()
+        inner_func(*args, **kwargs)
+        end = time.time()
+        duration_secs = end - start
+        # print(f"Executed {inner_func.__name__} in {duration_secs: .3f} secs")
+        return round(duration_secs, 3)
+    return wrapped_func
+
+
+def checkForDefaultToken(tokens: list, re: object):
+    try:
+        present = list(filter(re.compile("default*").match, tokens))[0].strip()
+        if re.fullmatch(r"^default\s?=\s?[0-9A-Za-z]+$", present) and present != "":
+            defaultValue = present.split("=")[1].strip()
+            if defaultValue != None:
+                return True, defaultValue
+        return True, None
+    except:
+        return False
+
+
+def getConstraints(tokens: list, constraints: tuple):
+    allConstraint: list = []
+    # defaultPresent: bool = False
+    for constraint in constraints:
+        # if 'default' in constraint:
+        # defaultPresent = True
+        if tokens.count(constraint) == 1:
+            allConstraint.append(constraint)
+    allConstraint = ','.join(allConstraint)
+    return allConstraint
+
+
+def ifMultipleDatatype(tokens: list, datatype: list):
+    count: int = 0
+    for token in tokens:
+        if 'default' in token:
+            token = 'default'
+        if datatype.count(token) == 1:
+            count += 1
+    if count > 1:
+        return True
+    return False
+
+
+def getLength(tokens: list, datatypes: dict):
+    if len(tokens) > 2:
+        if tokens[1] in datatypes and int(tokens[2]) in range(*datatypes[tokens[1]]):
+            return int(tokens[2])
+    return None
