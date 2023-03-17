@@ -1,12 +1,3 @@
-def parser(file: object, handle: str) -> list:
-    while True:
-        content = file.readLine().split('=')
-        if handle.lower() == content[0].lower():
-            data = content[1]
-            break
-    return data
-
-
 def displayTable(field: list = None, records: list = None, sep: str = None):
     '''Display the output in tablular format'''
     maxLength = []  # To determine the maximum length/width of each field/column
@@ -63,13 +54,8 @@ def validParenthesis(userInput: str):
     return False
 
 
-def isValidEntry(entry: str, datatype: str, length: int = None):
-    pass
-
-
 def getData(file: object):
-    file = open("./databases/test.zdb", 'rb')
-    data = []
+    data: list = []
     import pickle
     file.seek(0)
     while True:
@@ -78,19 +64,6 @@ def getData(file: object):
         except:
             break
     return data
-
-
-def time(inner_func):
-    import time
-
-    def wrapped_func(*args, **kwargs):
-        start = time.time()
-        inner_func(*args, **kwargs)
-        end = time.time()
-        duration_secs = end - start
-        # print(f"Executed {inner_func.__name__} in {duration_secs: .3f} secs")
-        return round(duration_secs, 3)
-    return wrapped_func
 
 
 def checkForDefaultToken(tokens: list, re: object):
@@ -129,8 +102,59 @@ def ifMultipleDatatype(tokens: list, datatype: list):
     return False
 
 
-def getLength(tokens: list, datatypes: dict):
+def getLength(tokens: list, datatypes: dict, constraints: tuple):
     if len(tokens) > 2:
+        if tokens[2] in constraints:
+            return datatypes[tokens[1]][1]
         if tokens[1] in datatypes and int(tokens[2]) in range(*datatypes[tokens[1]]):
             return int(tokens[2])
     return None
+
+
+def getTableData(file: object, tableName: str):
+    existingTable = getData(file)
+    for table in existingTable:
+        if table.startswith(tableName):
+            return table
+    return None
+
+
+def isValidEntry(tableData: list, input: list):
+    def checkLengthRange(inputLength: int, datatype: str,):
+        if datatype in ('varchar', 'char', 'blob', 'int'):
+            datatypeMaxRange: int = int(
+                datatype[datatype.rfind('(')+1:datatype.rfind(")")])
+            if inputLength-2 <= datatypeMaxRange:
+                return True
+        return True
+    validity: dict = {'int': 1, 'varchar': "", 'char': '',
+                      'blob': '', 'date': '', 'decimal': 2.0, 'bool': True}
+    if len(tableData) == len(input):
+        for index in range(len(tableData)):
+            datatype: str = tableData[index].split(",")[0]
+            datatypeElement: str = datatype
+            datatype = datatype[datatype.find("(")+1:datatype.rfind(")")]
+            datatype = datatype.split("(")[0]
+            if not type(eval(input[index])) == type(validity[datatype]) or not checkLengthRange(len(input[index]), datatypeElement):
+                return False
+    return True
+
+
+def insertDefaultValue(keys: list, value: list, input: str):
+    if 'default' in keys and input == "''":
+        startIndex: int = keys.find("default(")+8
+        endIndex: int = keys[startIndex:].find(")")+startIndex
+        try:
+            return eval(keys[startIndex:endIndex])
+        except:
+            return keys[startIndex:endIndex]
+    return eval(input)
+
+
+def getIndexPos_selectedItems(data: list, items: list):
+    newList_Item: dict = {}
+    for item in items:
+        for element in data:
+            if element.startswith(item):
+                newList_Item[item] = data.index(element)
+    return newList_Item

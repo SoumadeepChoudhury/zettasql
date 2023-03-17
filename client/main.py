@@ -7,6 +7,9 @@ FILE: object = None             # Holds the database file object
 DATABASE_NAME: str = None       # Holds the database name
 TABLE_DISPLAYED: bool = False   # Flag for if table is displayed
 ERROR: bool = False             # Flag for any error
+# KEYS,EXTRAS -> Used in desc table for showing the structure
+KEYS: list = ["primary_key", "foreign_key", "unique_key"]
+EXTRAS: list = ["auto_increment"]
 DATATYPES: dict = {'int': [0, 4294967295], 'varchar': [1, 256], 'blob': [0, 65535], 'char': [1, 256], 'date': [],
                    'decimal': [], 'bool': []}  # Contains the datatypes
 CONSTRAINTS = ('auto_increment', 'primary_key',
@@ -140,7 +143,7 @@ def create_Table(cmd: str):
                     datatype: str = tokens[1]
                     try:
                         length: int | None = getLength(
-                            tokens, DATATYPES)
+                            tokens, DATATYPES, CONSTRAINTS)
                         constraints: str | list = getConstraints(
                             tokens, CONSTRAINTS)
                     except:
@@ -170,7 +173,7 @@ def create_Table(cmd: str):
                             break
                     data = getData(FILE)
                     for names in data:          # Checking for if tableName exists
-                        if tableName.lower() == names.split("=")[0].strip():
+                        if tableName.lower() == names.split("=")[0].strip().lower():
                             tableData = ""
                             print(
                                 f"ERROR 1023: Cannot create table. '{tableName}' already exists.")
@@ -194,7 +197,6 @@ def create_Table(cmd: str):
                     f"ERROR 1011: Syntax Error in ZettaSQL command near '{item}'")
                 break
         tableData += '}' if tableData != "" else ''
-        print(tableData)
         if FILE != None and tableData != "":
             import pickle
             FILE.seek(0)
@@ -209,31 +211,252 @@ def create_Table(cmd: str):
             f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
 
-def desc(cmd):
-    # TODO : display the outlayer or the table structure
-    pass
+def desc(cmd: str):
+    global ERROR, TABLE_DISPLAYED, FILE, DATATYPES
+    if re.fullmatch(r"^desc (\S+)\s?;$", cmd):
+        cmd = cmd[:-1]
+        preset: list = None
+        try:
+            cmd = cmd.split(" ")[1].strip()
+            existingTables: list = getData(FILE)
+            for tableName in existingTables:
+                if cmd.lower() == tableName.split("=")[0].strip().lower():
+                    preset: dict = eval(tableName.split("=")[1].strip())
+                    break
+            if preset == None:
+                ERROR = True
+                print(f"ERROR 1019: Unknown table '{cmd}'")
+            else:
+                fields: list = ["Field", "Type",
+                                "Null", "Key", "Default", "Extra"]
+                records: list = []
+                added: bool = False
+                for key in preset.keys():
+                    dataPreset: list = [key[:key.find("(")]]
+                    defaultPresent: bool = False
+                    key = key[key.find('(')+1:key.rfind(')')]
+                    keyElements = key.split(",")
+                    for element in keyElements:
+                        field = re.split("[\(\)]", element)
+                        fieldName = field[0]
+                        if 'default' in field:
+                            defaultPresent = True
+                            break
+                        if len(field) > 1:
+                            if int(field[1]) == DATATYPES[fieldName][1]:
+                                dataPreset.append(fieldName)
+                            else:
+                                dataPreset.append(f"{fieldName}({field[1]})")
+                                added = True
+                    if fieldName in DATATYPES and not added:
+                        dataPreset.append(fieldName)
+                    if defaultPresent:
+                        default = field[1]
+                    extras = list(set(EXTRAS) & set(keyElements))
+                    if extras == []:
+                        extras = ''
+                    specialKey = list(set(KEYS) & set(keyElements))
+                    if specialKey == []:
+                        specialKey = ''
+
+                    dataPreset.extend([
+                        'no' if specialKey != '' else 'yes', specialKey[0][0:3] if specialKey != '' else '', default if defaultPresent else "null", extras[0] if extras != '' else ''])
+                    records.append(dataPreset)
+                displayTable(field=fields, records=records)
+                TABLE_DISPLAYED = True
+
+        except:
+            ERROR = True
+            bug: list = re.split(r'^desc (\S+);$', cmd)
+            print(
+                f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
+    else:
+        ERROR = True
+        bug: list = re.split(r'^desc (\S+);$', cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
 
 def drop_database(cmd: str):
-    # TODO : To delete the database from system
-    pass
+    global ERROR, FILE
+    if re.fullmatch(r"^drop database (\S+);$", cmd):
+        file = re.split(r"^drop database (\S+);$", cmd)[1]
+        if os.path.exists(f"./databases/{file}.zdb"):
+            os.remove(f"./databases/{file}.zdb")
+            FILE_name: str = str(FILE.name)
+            if file == FILE_name[FILE_name.rfind("/")+1:FILE_name.rfind(".")]:
+                FILE = None
+        else:
+            ERROR = True
+            print(f"ERROR 1020: Unknown database '{file}'")
+    else:
+        ERROR = True
+        bug: list = re.split(r'^drop database (\S+);$', cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
 
 def drop_table(cmd: str):
-    # TODO : To delete the table from database
-    pass
+    global ERROR, FILE
+    if re.fullmatch(r"^drop table (\S+);$", cmd):
+        existingTables: list = getData(FILE)
+        tableName: str = re.split(r"^drop table (\S+);$", cmd)[1].strip()
+        tableFound: bool = False
+        import pickle
+        FILE.seek(0)
+        FILE.truncate(0)
+        for table in existingTables:
+            if table.startswith(f"{tableName}="):
+                tableFound = True
+                continue
+            pickle.dump(table, FILE)
+        FILE.flush()
+        if not tableFound:
+            ERROR = True
+            print(f"ERROR 1019: Unknown table '{tableName}'")
+    else:
+        ERROR = True
+        bug: list = re.split(r'^drop table (\S+);$', cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
 
 def delete(cmd: str):
-    # TODO : Delete records of the table without deleting the structure of the table.
-    pass
+    global ERROR, FILE
+    if re.fullmatch(r"^delete from table (\S+);$", cmd):
+        existingTables: list = getData(FILE)
+        tableName: str = re.split(r"^delete from table (\S+);$", cmd)[1]
+        tableFound: bool = False
+        import pickle
+        FILE.seek(0)
+        for table in existingTables:
+            if table.startswith(f"{tableName}="):
+                tableFound = True
+                table = eval(table.split("=")[1].strip())
+                table = {x: [] for x in table}
+                table = tableName+'='+str(table)
+            pickle.dump(table, FILE)
+        FILE.flush()
+        if not tableFound:
+            ERROR = True
+            print(f"ERROR 1019: Unknown table '{tableName}'")
+    else:
+        ERROR = True
+        bug: list = re.split(r'^delete from table (\S+);$', cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
+
+
+def insert(cmd: str):
+    global ERROR, FILE
+    # insert into table2(no,sname) values(1,"Hi Hello");
+    if re.fullmatch(r"^insert into (\S+)\svalues\s?\(\S+\);$", cmd):
+        tableName = re.split(
+            r"^insert into (\S+)\svalues\s?\(\S+\);$", cmd)[1].strip().lower()
+        cmd = cmd[:-1].strip()  # removing the semicolon
+        cmd = cmd[cmd.rfind("(")+1:cmd.rfind(")")]  # getting the values
+        cmd = cmd.split(",")            # splitting the values
+        refinedInput = [i for i in cmd if i != '']   # removing blank spaces
+        tableData: str = eval(getTableData(
+            FILE, tableName).split("=")[1].strip())
+        try:
+            if len(list(tableData.keys())) == len(refinedInput) and isValidEntry(list(tableData.keys()), refinedInput):
+                index = 0
+                for key, value in tableData.items():
+                    refinedInput[index] = insertDefaultValue(
+                        key, value, refinedInput[index])
+                    if refinedInput[index] == '' or refinedInput[index] == "''":
+                        refinedInput[index] = 'null'
+                    value.append(refinedInput[index])
+                    index += 1
+                if FILE != None:
+                    existingTables: list = getData(FILE)
+                    import pickle
+                    FILE.seek(0)
+                    for table in existingTables:
+                        if not table.startswith(tableName):
+                            pickle.dump(table, FILE)
+                            continue
+                        pickle.dump(f"{tableName}={tableData}", FILE)
+                    FILE.flush()
+            else:
+                raise ValueError("Entry doesn't satisfy")
+        except Exception as e:
+            ERROR = True
+            print(
+                f"ERROR 1011: Syntax Error in ZettaSQL command. \"{e}\"")
+        if tableData == None:
+            ERROR = True
+            print(f"ERROR 1019: Unknown Table '{tableName}'")
+    else:
+        ERROR = True
+        bug: list = re.split(r"^insert into (\S+)\svalues\s?\(\S+\);$", cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
+
+
+def select(cmd: str):
+    global ERROR, FILE, TABLE_DISPLAYED
+    if re.fullmatch(r"^select [\*|(\S+\s?,?\s?)*]+ from \S+;$", cmd):
+        cmd = cmd[:-1]
+        cmd = cmd.split(" ")
+        items: list = cmd[cmd.index("select")+1:cmd.index("from")]
+        items = items[0].split(",") if len(items) == 1 else items
+        items = [x.replace(",", "").strip()
+                 for x in items if x.strip() not in (",", "", " ")]
+        tableName: str = cmd[-1]
+        if '*' in items and len(items) > 1:
+            ERROR = True
+            print(
+                f"ERROR 1011: Syntax Error in ZettaSQL command near \'{items[1]}\'")
+            return
+        data: dict = eval(getTableData(FILE, tableName).split("=")[1].strip())
+        fields: list = []
+        records: list = []
+        for keys in data.keys():
+            fields.append(keys[:keys.find("(")])
+        if '*' in items:
+            for times in range(len(list(data.values())[0])):
+                recordLine: list = []
+                for values in data.values():
+                    # print(times, "-->", values[times])
+                    recordLine.append(values[times])
+                records.append(recordLine)
+            displayTable(field=fields, records=records)
+            TABLE_DISPLAYED = True
+        else:
+            updateField: list = []
+            for item in items:
+                if item in fields:
+                    updateField.append(item)
+                else:
+                    ERROR = True
+                    print(
+                        f"ERROR 1011: Syntax Error in ZettaSQL command near '{item}'")
+                    return
+            fields = updateField
+            itemIndexed: dict = getIndexPos_selectedItems(
+                list(data.keys()), items)
+            for times in range(len(list(data.values())[0])):
+                recordLine: list = []
+                for itemIndex in itemIndexed.values():
+                    recordLine.append(list(data.values())[itemIndex][times])
+                records.append(recordLine)
+            displayTable(field=fields, records=records)
+            TABLE_DISPLAYED = True
+
+    else:
+        ERROR = True
+        bug: list = re.split(
+            r"^select [\s?\*\s?|(\S+\s?,?\s?)*]+ from \S+;$", cmd)
+        print(
+            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
 
 
 COMMANDS: dict = {"use": use_Database, "create database": create_Database,
-                  "show databases": show_Database, "show tables": show_Tables, "create table": create_Table, "desc": desc, "drop database": drop_database, "drop table": drop_table, "delete": delete}
+                  "show databases": show_Database, "show tables": show_Tables, "create table": create_Table, "desc": desc, "drop database": drop_database, "drop table": drop_table, "delete from": delete, "insert into": insert, "select": select}
 
 
-@time
 def main():
     try:
         from getpass import getpass
@@ -305,10 +528,10 @@ def main():
                     version: int | float = str([i for i in items if "version :" in i][0]).split(
                         ":")[1].strip()  # fetching the version code
                 print("""
- ______     _   _        _____  _____ _     
-|___  /    | | | |      /  ___||  _  | |    
-   / /  ___| |_| |_ __ _\ `--. | | | | |    
-  / /  / _ \ __| __/ _` |`--. \| | | | |    
+ ______     _   _        _____  _____ _
+|___  /    | | | |      /  ___||  _  | |
+   / /  ___| |_| |_ __ _\ `--. | | | | |
+  / /  / _ \ __| __/ _` |`--. \| | | | |
 ./ /__|  __/ |_| || (_| /\__/ /\ \/' / |____
 \_____/\___|\__|\__\__,_\____/  \_/\_\_____/
     """)
