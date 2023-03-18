@@ -1,0 +1,9 @@
+1000 : Can't connect to ZettaSQL server
+1011 : Syntax Error in ZettaSQL Commands
+1012 : Unknown ZettaSQL command
+1019 : Unknown Table
+1020 : Unknown database
+1021 : Can't create database
+1022 : Database not selected
+1023 : Table already exists
+1024 : Default datatype Value error

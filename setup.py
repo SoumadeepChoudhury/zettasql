@@ -1,16 +1,17 @@
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
 import requests
-NAME='zettasql'
+NAME = 'zettasql'
 try:
-    LONG_DESC=requests.get("https://raw.githubusercontent.com/SoumadeepChoudhury/zettasql/main/README.md").text
+    LONG_DESC = requests.get(
+        "https://raw.githubusercontent.com/SoumadeepChoudhury/zettasql/main/README.md").text
 except:
-    LONG_DESC=''
-VERSION=''
-with open("./client/info.log","r") as infoFile:
-    lines=infoFile.readlines()
+    LONG_DESC = ''
+VERSION = ''
+with open("./client/info.log", "r") as infoFile:
+    lines = infoFile.readlines()
     for line in lines:
         if line.startswith("version :"):
-            VERSION=line.split(":")[1].strip()
+            VERSION = line.split(":")[1].strip()
 
 setup(
     name=NAME,
@@ -21,9 +22,7 @@ setup(
     author="Ahens | An Initiative to Initial",
     packages=find_packages(exclude=['.*']),
     entry_points={
-        'console_scripts':['zettasql-start=server.start:start','zettasql-stop=server.stop:stop','zettasql=client.main:main'
-                               ],
-        },
+        'console_scripts': ['zettasql-start=server.start:start', 'zettasql-stop=server.stop:stop', 'zettasql=client.main:main', 'zettasql-help=server.help:help'
+                            ],
+    },
 )
-
-

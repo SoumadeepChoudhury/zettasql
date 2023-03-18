@@ -131,7 +131,6 @@ dmypy.json
 .log
 .config
 info.log
-ERRORLOG
 databases
 .vscode/extensions.json
 .vscode/launch.json
