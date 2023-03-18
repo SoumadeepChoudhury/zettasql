@@ -80,10 +80,7 @@ def checkForDefaultToken(tokens: list, re: object):
 
 def getConstraints(tokens: list, constraints: tuple):
     allConstraint: list = []
-    # defaultPresent: bool = False
     for constraint in constraints:
-        # if 'default' in constraint:
-        # defaultPresent = True
         if tokens.count(constraint) == 1:
             allConstraint.append(constraint)
     allConstraint = ','.join(allConstraint)

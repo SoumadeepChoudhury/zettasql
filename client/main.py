@@ -1,4 +1,4 @@
-from HelperModule import *
+from .HelperModule import *
 import re
 import os
 
@@ -32,7 +32,7 @@ def use_Database(cmd: str):
         global FILE, DATABASE_NAME
         try:
             # Globally opens the file for future use.
-            FILE = open(f"./databases/{file}.zdb", 'rb+')
+            FILE = open(f"./client/databases/{file}.zdb", 'rb+')
             DATABASE_NAME = file
         except FileNotFoundError:
             ERROR = True
@@ -52,14 +52,14 @@ def create_Database(cmd: str):
             present = True
         # Getting the file (database) Name
         file: str = cmd.replace(";", "").strip().split()[-1]
-        if os.path.exists(f"./databases/{file}.zdb"):
+        if os.path.exists(f"./client/databases/{file}.zdb"):
             if not present:
                 ERROR = True
                 print(
                     f"ERROR 1021: Can't create database '{file}'; database exists")
         else:
             # Creates the file Instance (Temporary stored)
-            _ = open(f"./databases/{file}.zdb", 'wb+')
+            _ = open(f"./client/databases/{file}.zdb", 'wb+')
             _.close()
     else:
         ERROR = True
@@ -74,7 +74,7 @@ def show_Database(cmd: str):
     if re.fullmatch(r"^show databases;$", cmd):
         global TABLE_DISPLAYED
         files: list = list()
-        filesInDirectory: list = os.listdir("./databases/")
+        filesInDirectory: list = os.listdir("./client/databases/")
         for i in filesInDirectory:
             if not i.startswith("."):
                 files.append([i])
@@ -281,8 +281,8 @@ def drop_database(cmd: str):
     global ERROR, FILE
     if re.fullmatch(r"^drop database (\S+);$", cmd):
         file = re.split(r"^drop database (\S+);$", cmd)[1]
-        if os.path.exists(f"./databases/{file}.zdb"):
-            os.remove(f"./databases/{file}.zdb")
+        if os.path.exists(f"./client/databases/{file}.zdb"):
+            os.remove(f"./client/databases/{file}.zdb")
             FILE_name: str = str(FILE.name)
             if file == FILE_name[FILE_name.rfind("/")+1:FILE_name.rfind(".")]:
                 FILE = None
@@ -481,9 +481,9 @@ def main():
         arg: list = sys.argv  # getting the command line tags
         if len(arg) >= 4 and arg[1] == '-u' and arg[3] == '-p':
             # checking for login criteria
-            if os.path.exists("../server/.config"):
+            if os.path.exists("./server/.config"):
                 # .config files stores users data like username and password.
-                with open("../server/.config", 'rb') as file:
+                with open("./server/.config", 'rb') as file:
                     import pickle
                     data: dict = pickle.load(file)
                 if data['username@admin'] != arg[2]:
@@ -499,11 +499,11 @@ def main():
                 sys.exit()
             else:
                 flag = True
-                if not os.path.exists("../server/.log"):
+                if not os.path.exists("./server/.log"):
                     # .log file contains server information like it's state of connection
                     print("ERROR 1000 : Can't connect to ZettaSQL server")
                     sys.exit()
-                with open('info.log', 'r+') as file:
+                with open('./client/info.log', 'r+') as file:
                     # info.log file contains application information
                     # checks for connection id and edits the info.log file for new connection id
                     items: list = file.readlines()
