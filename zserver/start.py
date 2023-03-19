@@ -17,7 +17,7 @@ def start():
         try:
             if not os.path.exists(f"{PATH}/zserver/.config"):
                 # .config file contains the cloent details.
-                with open(f"{PATH}/.config", 'wb') as file:
+                with open(f"{PATH}/zserver/.config", 'wb') as file:
                     # Upload the user credentials in .config
                     from getpass import getpass
                     print("[*] Create root User")
