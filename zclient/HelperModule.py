@@ -117,11 +117,14 @@ def getTableData(file: object, tableName: str):
 
 
 def isValidEntry(tableData: list, input: list):
-    def checkLengthRange(inputLength: int, datatype: str,):
+    def checkLengthRange(inputLength: int, datatypeElement: str, datatype: str):
         if datatype in ('varchar', 'char', 'blob', 'int'):
-            datatypeMaxRange: int = int(
-                datatype[datatype.rfind('(')+1:datatype.rfind(")")])
-            if inputLength-2 <= datatypeMaxRange:
+            try:
+                datatypeMaxRange: int = int(
+                    datatypeElement[datatypeElement.rfind('(')+1:datatypeElement.find(")")])
+                if inputLength-2 <= datatypeMaxRange:
+                    return True
+            except:
                 return True
         return True
     validity: dict = {'int': 1, 'varchar': "", 'char': '',
@@ -132,7 +135,10 @@ def isValidEntry(tableData: list, input: list):
             datatypeElement: str = datatype
             datatype = datatype[datatype.find("(")+1:datatype.rfind(")")]
             datatype = datatype.split("(")[0]
-            if not type(eval(input[index])) == type(validity[datatype]) or not checkLengthRange(len(input[index]), datatypeElement):
+            if datatype == 'int' and input[index] == "''":
+                input[index] = "null"
+                continue
+            if not type(eval(input[index])) == type(validity[datatype]) or not checkLengthRange(len(input[index]), datatypeElement, datatype):
                 return False
     return True
 
@@ -145,6 +151,8 @@ def insertDefaultValue(keys: list, value: list, input: str):
             return eval(keys[startIndex:endIndex])
         except:
             return keys[startIndex:endIndex]
+    if input == 'null':
+        return input
     return eval(input)
 
 

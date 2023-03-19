@@ -35,6 +35,10 @@ def use_Database(cmd: str):
         global FILE, DATABASE_NAME
         try:
             # Globally opens the file for future use.
+            if not os.path.exists(f"{PATH}/zclient/databases"):
+                os.mkdir(f"{PATH}/zclient/databases")
+            if FILE != None:
+                print("Database changed")
             FILE = open(f"{PATH}/zclient/databases/{file}.zdb", 'rb+')
             DATABASE_NAME = file
         except FileNotFoundError:
@@ -77,6 +81,8 @@ def show_Database(cmd: str):
     if re.fullmatch(r"^show databases;$", cmd):
         global TABLE_DISPLAYED
         files: list = list()
+        if not os.path.exists(f"{PATH}/zclient/databases"):
+            os.mkdir(f"{PATH}/zclient/databases")
         filesInDirectory: list = os.listdir(f"{PATH}/zclient/databases/")
         for i in filesInDirectory:
             if not i.startswith("."):
@@ -119,6 +125,10 @@ def show_Tables(cmd: str):
 
 def create_Table(cmd: str):
     global ERROR, DATATYPES, CONSTRAINTS, FILE, DATATYPE_CONSTRAINT_MATCH
+    if FILE == None:
+        ERROR = True
+        print(f"ERROR 1022: Database not selected.")
+        return
     if re.fullmatch(r"^create table (\w+\s?\((\S{1,}\s\S{1,},?\s*)+\));$", cmd):
         cmd = str(
             (cmd.replace("create table ", "").strip()).replace(";", ""))    # replacing unnnecessary strings
@@ -235,6 +245,7 @@ def desc(cmd: str):
                 records: list = []
                 added: bool = False
                 for key in preset.keys():
+                    added = False
                     dataPreset: list = [key[:key.find("(")]]
                     defaultPresent: bool = False
                     key = key[key.find('(')+1:key.rfind(')')]
@@ -285,10 +296,11 @@ def drop_database(cmd: str):
     if re.fullmatch(r"^drop database (\S+);$", cmd):
         file = re.split(r"^drop database (\S+);$", cmd)[1]
         if os.path.exists(f"{PATH}/zclient/databases/{file}.zdb"):
-            os.remove(f"{PATH}/zclient/databases/{file}.zdb")
-            FILE_name: str = str(FILE.name)
+            FILE_name: str = str(FILE.name if FILE != None else '')
             if file == FILE_name[FILE_name.rfind("/")+1:FILE_name.rfind(".")]:
+                FILE.close()
                 FILE = None
+            os.remove(f"{PATH}/zclient/databases/{file}.zdb")
         else:
             ERROR = True
             print(f"ERROR 1020: Unknown database '{file}'")
@@ -400,60 +412,69 @@ def insert(cmd: str):
 
 def select(cmd: str):
     global ERROR, FILE, TABLE_DISPLAYED
-    if re.fullmatch(r"^select [\*|(\S+\s?,?\s?)*]+ from \S+;$", cmd):
-        cmd = cmd[:-1]
-        cmd = cmd.split(" ")
-        items: list = cmd[cmd.index("select")+1:cmd.index("from")]
-        items = items[0].split(",") if len(items) == 1 else items
-        items = [x.replace(",", "").strip()
-                 for x in items if x.strip() not in (",", "", " ")]
-        tableName: str = cmd[-1]
-        if '*' in items and len(items) > 1:
-            ERROR = True
-            print(
-                f"ERROR 1011: Syntax Error in ZettaSQL command near \'{items[1]}\'")
-            return
-        data: dict = eval(getTableData(FILE, tableName).split("=")[1].strip())
-        fields: list = []
-        records: list = []
-        for keys in data.keys():
-            fields.append(keys[:keys.find("(")])
-        if '*' in items:
-            for times in range(len(list(data.values())[0])):
-                recordLine: list = []
-                for values in data.values():
-                    # print(times, "-->", values[times])
-                    recordLine.append(values[times])
-                records.append(recordLine)
-            displayTable(field=fields, records=records)
-            TABLE_DISPLAYED = True
-        else:
-            updateField: list = []
-            for item in items:
-                if item in fields:
-                    updateField.append(item)
-                else:
-                    ERROR = True
-                    print(
-                        f"ERROR 1011: Syntax Error in ZettaSQL command near '{item}'")
-                    return
-            fields = updateField
-            itemIndexed: dict = getIndexPos_selectedItems(
-                list(data.keys()), items)
-            for times in range(len(list(data.values())[0])):
-                recordLine: list = []
-                for itemIndex in itemIndexed.values():
-                    recordLine.append(list(data.values())[itemIndex][times])
-                records.append(recordLine)
-            displayTable(field=fields, records=records)
-            TABLE_DISPLAYED = True
+    try:
+        if re.fullmatch(r"^select [\*|(\S+\s?,?\s?)*]+ from \S+;$", cmd):
+            cmd = cmd[:-1]
+            cmd = cmd.split(" ")
+            items: list = cmd[cmd.index("select")+1:cmd.index("from")]
+            items = items[0].split(",") if len(items) == 1 else items
+            items = [x.replace(",", "").strip()
+                     for x in items if x.strip() not in (",", "", " ")]
+            tableName: str = cmd[-1]
+            if '*' in items and len(items) > 1:
+                ERROR = True
+                print(
+                    f"ERROR 1011: Syntax Error in ZettaSQL command near \'{items[1]}\'")
+                return
+            returnedData: str = getTableData(FILE, tableName)
+            data: dict = eval(returnedData.split(
+                "=")[1].strip() if returnedData != None else {})
+            if data == {}:
+                raise ValueError
+            fields: list = []
+            records: list = []
+            for keys in data.keys():
+                fields.append(keys[:keys.find("(")])
+            if '*' in items:
+                for times in range(len(list(data.values())[0])):
+                    recordLine: list = []
+                    for values in data.values():
+                        # print(times, "-->", values[times])
+                        recordLine.append(values[times])
+                    records.append(recordLine)
+                displayTable(field=fields, records=records)
+                TABLE_DISPLAYED = True
+            else:
+                updateField: list = []
+                for item in items:
+                    if item in fields:
+                        updateField.append(item)
+                    else:
+                        ERROR = True
+                        print(
+                            f"ERROR 1011: Syntax Error in ZettaSQL command near '{item}'")
+                        return
+                fields = updateField
+                itemIndexed: dict = getIndexPos_selectedItems(
+                    list(data.keys()), items)
+                for times in range(len(list(data.values())[0])):
+                    recordLine: list = []
+                    for itemIndex in itemIndexed.values():
+                        recordLine.append(list(data.values())
+                                          [itemIndex][times])
+                    records.append(recordLine)
+                displayTable(field=fields, records=records)
+                TABLE_DISPLAYED = True
 
-    else:
+        else:
+            ERROR = True
+            bug: list = re.split(
+                r"^select [\s?\*\s?|(\S+\s?,?\s?)*]+ from \S+;$", cmd)
+            print(
+                f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
+    except ValueError:
         ERROR = True
-        bug: list = re.split(
-            r"^select [\s?\*\s?|(\S+\s?,?\s?)*]+ from \S+;$", cmd)
-        print(
-            f"ERROR 1011: Syntax Error in ZettaSQL command near \'{bug[len(bug)//2]}\'")
+        print(f"ERROR 1019: Unknown table '{tableName}'")
 
 
 COMMANDS: dict = {"use": use_Database, "create database": create_Database,
@@ -465,7 +486,10 @@ def main():
         from getpass import getpass
         import sys
         import signal
-        import readline
+        try:
+            import readline
+        except:
+            pass
 
         global TABLE_DISPLAYED, COMMANDS, ERROR, PATH
 

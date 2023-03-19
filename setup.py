@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 import requests
 NAME = 'zettasql'
 LONG_DESC = ''
-# try:
-#     LONG_DESC = requests.get(
-#         "https://raw.githubusercontent.com/SoumadeepChoudhury/zettasql/main/README.md").text
-# except:
-#     LONG_DESC = ''
+try:
+    LONG_DESC = requests.get(
+        "https://raw.githubusercontent.com/SoumadeepChoudhury/zettasql/main/README.md").text
+except:
+    LONG_DESC = ''
 VERSION = ''
 with open("./zclient/info.log", "r") as infoFile:
     lines = infoFile.readlines()
@@ -33,7 +33,7 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",
     ],
-    packages=find_packages(exclude=['.*']),
+    packages=find_packages(),
     include_package_data=True,
     package_data={'zclient': ['*.log']},
     entry_points={
