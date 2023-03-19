@@ -20,6 +20,18 @@ setup(
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',
     author="Ahens | An Initiative to Initial",
+    author_email="ahensinitiative@gmail.com",
+    license="MIT",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Operating System :: Unix",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+    ],
     packages=find_packages(exclude=['.*']),
     entry_points={
         'console_scripts': ['zettasql-start=server.start:start', 'zettasql-stop=server.stop:stop', 'zettasql=client.main:main', 'zettasql-help=server.help:help'
