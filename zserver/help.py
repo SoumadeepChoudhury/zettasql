@@ -1,6 +1,9 @@
 def help():
+    PATH = __file__ if '/' in __file__ else __file__.replace("\\", "/")
+    PATH = PATH[:PATH.rfind("/")]
+    PATH = PATH[:PATH.rfind("/")]
     docs_url = ""
-    with open("./client/info.log", 'r') as file:
+    with open(f"{PATH}/zclient/info.log", 'r') as file:
         lines = file.readlines()
         for line in lines:
             if line.startswith("docs_url :"):

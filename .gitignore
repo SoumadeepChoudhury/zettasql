@@ -134,3 +134,4 @@ info.log
 databases
 .vscode/extensions.json
 .vscode/launch.json
+Makefile

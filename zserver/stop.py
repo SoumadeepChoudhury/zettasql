@@ -4,9 +4,12 @@ def stop():
     import platform
     import os
     PID = 0
-    if os.path.exists("./server/.log"):
+    PATH = __file__ if '/' in __file__ else __file__.replace("\\", "/")
+    PATH = PATH[:PATH.rfind("/")]
+    PATH = PATH[:PATH.rfind("/")]
+    if os.path.exists(f"{PATH}/zserver/.log"):
         # .log contains server information
-        with open("./server/.log", 'rb') as file:
+        with open(f"{PATH}/zserver/.log", 'rb') as file:
             # loading data from file
             import pickle
             try:
@@ -20,9 +23,9 @@ def stop():
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 file.close()
                 # removing the file for new generation later.
-                os.remove("./server/.log")
+                os.remove(f"{PATH}/zserver/.log")
                 try:
-                    with open("./client/info.log", 'r+') as file:
+                    with open(f"{PATH}/zclient/info.log", 'r+') as file:
                         # updating session information in info.log file which stores application state.
                         data = ''.join(file.readlines()[:-1])
                         file.truncate(0)

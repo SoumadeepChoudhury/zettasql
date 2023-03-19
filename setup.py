@@ -1,11 +1,12 @@
 from setuptools import setup, find_packages
 import requests
 NAME = 'zettasql'
-try:
-    LONG_DESC = requests.get(
-        "https://raw.githubusercontent.com/SoumadeepChoudhury/zettasql/main/README.md").text
-except:
-    LONG_DESC = ''
+LONG_DESC = ''
+# try:
+#     LONG_DESC = requests.get(
+#         "https://raw.githubusercontent.com/SoumadeepChoudhury/zettasql/main/README.md").text
+# except:
+#     LONG_DESC = ''
 VERSION = ''
 with open("./client/info.log", "r") as infoFile:
     lines = infoFile.readlines()
