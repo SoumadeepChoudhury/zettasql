@@ -8,7 +8,7 @@ LONG_DESC = ''
 # except:
 #     LONG_DESC = ''
 VERSION = ''
-with open("./client/info.log", "r") as infoFile:
+with open("./zclient/info.log", "r") as infoFile:
     lines = infoFile.readlines()
     for line in lines:
         if line.startswith("version :"):
@@ -34,8 +34,10 @@ setup(
         "Operating System :: Microsoft :: Windows",
     ],
     packages=find_packages(exclude=['.*']),
+    include_package_data=True,
+    package_data={'zclient': ['*.log']},
     entry_points={
-        'console_scripts': ['zettasql-start=server.start:start', 'zettasql-stop=server.stop:stop', 'zettasql=client.main:main', 'zettasql-help=server.help:help'
+        'console_scripts': ['zettasql-start=zserver.start:start', 'zettasql-stop=zserver.stop:stop', 'zettasql=zclient.main:main', 'zettasql-help=zserver.help:help'
                             ],
     },
 )
