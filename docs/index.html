@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ZettaSQL : Documentation</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body background="background.jfif" style="background-size:100%;">
+	<h1 class="gradient-text">ZettaSQL</h1>
+
+	<div class="container-left" style="margin:-30px 2rem 2rem 2rem;">
+		<h2>Introduction</h2>
+		<p>ZettaSQL - the most popular Open Source SQL database management system, is developed,distributed, and
+			supported by <a href="https://ahens.rf.gd" target="_blank">Ahens</a> Corporation.</p>
+		<ul>
+			<li><i><b>ZettaSQL is a database management system.</b></i></li>
+			<li><i><b>ZettaSQL databases are relational.</b></i></li>
+			<li><i><b>ZettaSQL software is Open Source.</b></i></li>
+			<li><i><b>The ZettaSQL Database Server is very fast, reliable, scalable, and easy to use.</b></i></li>
+			<li><i><b>ZettaSQL Server works in client/server or embedded systems.</b></i></li>
+			<li><i><b>ZettaSQL commands are <em> at all case sensitive</em>. Everything is stored and retrived in small
+						letters.</b></i></li>
+		</ul>
+
+		<h2>Installation</h2>
+		<p>To install the application, simply follow the instructions provided in the <a
+				href="https://github.com/SoumadeepChoudhury/zettasql#readme" target="_blank">installation guide.</a></p>
+
+		<h2>Usage</h2>
+		<p>To use the application, these are the existing commands:</p>
+		<div class="code-block">
+			<code title="Starts the ZettaSQL server">&nbsp;&nbsp;&nbsp;zettasql-start</code><br>
+			<code title="Logs in into the ZettaSQL utility">&nbsp;&nbsp;&nbsp;zettasql -u &lt;username&gt; -p</code><br>
+			<code title="Stops the ZettaSQL server">&nbsp;&nbsp;&nbsp;zettasql-stop</code><br>
+			<code title="Displays the man page">&nbsp;&nbsp;&nbsp;zettasql-help</code>
+		</div>
+	</div>
+
+	<div class="container-right">
+		<h1 style="color: rgb(77, 77, 9);">
+			ZettaSQL : SQL Commands</h1>
+		<h2>Create databases</h2>
+		<div class="code-block">
+			<code>create database &lt;database_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Create database command creates a new database of zettasql to work upon. A database name
+			could be either letters or digits or alpha-numeric.</p>
+		<h2>Select databases</h2>
+		<div class="code-block">
+			<code>use &lt;database_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Selects the database to work with. Only existing database could be selected, otherwise
+			it may generate error.</p>
+		<h2>Show existing databases</h2>
+		<div class="code-block">
+			<code>show databases<span>;</span></code>
+		</div>
+		<p class="command-desc">Lists the existing databases in the system in a tabular format.</p>
+		<h2>Create tables</h2>
+		<div class="code-block">
+			<code>create table &lt;table_name&gt;(&lt;field_name&gt; &lt;datatype(length)&gt; &lt;constarints&gt;,...)<span>;</span></code>
+		</div>
+		<p class="command-desc">Creates tables inside the selected database. No quotes(''/"") are allowed. Length is
+			optional <a href="#constraints">Constraints</a> & <a href="#datatypes">Datatypes</a>
+			are discussed below.</p>
+		<h2>Describe table structure</h2>
+		<div class="code-block">
+			<code>desc &lt;table_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Describes the structure of the table with given table name in tabular format.</p>
+		<h2>Show existing tables</h2>
+		<div class="code-block">
+			<code>show tables<span>;</span></code>
+		</div>
+		<p class="command-desc">Lists the existing tables in the selected database in tabular format.</p>
+		<h2>Insert data into existing tables</h2>
+		<div class="code-block">
+			<code>insert into &lt;tabele_name&gt; values(...)<span>;</span></code>
+		</div>
+		<p class="command-desc">Inserts data in the selected table. The values will be in sequence in which table was
+			created. For skipping the field, you have to give a blank quote only, without space in that sequence. The
+			String values for varchar and char and blob you have to enclose the value within quotes wither single('') or
+			double("").</p>
+		<p>For Example:<br>&nbsp;&nbsp;&nbsp;<code>insert into table1 values(1,'Value','',4);</code></p>
+		<p class="command-desc">Here the table was created with (int,varchar,int,int).</p>
+		<h2>Display data from existing tables</h2>
+		<div class="code-block">
+			<code>select * from &lt;table_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Displays the data from the existing (chosen) table in tabular format. You can also
+			select fields with field name instead of * which displays all the present data.</p>
+		<h2>Deletes data from existing tables</h2>
+		<div class="code-block">
+			<code>delete from table &lt;table_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Deletes all the existing data from the selected table without deleting the structure of
+			the table.</p>
+		<h2>Deletes existing tables</h2>
+		<div class="code-block">
+			<code>drop table &lt;table_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Deletes the selected table itself (data+structure).</p>
+		<h2>Deletes existing databases</h2>
+		<div class="code-block">
+			<code>drop database &lt;database_name&gt;<span>;</span></code>
+		</div>
+		<p class="command-desc">Deletes the selected database itself.</p>
+	</div>
+	<div class="container-left" style="margin: 2rem;">
+		<h1><a id="constraints" style="border-bottom: 0px;">Constraints<a></a></h1>
+		<h2>auto_increment</h2>
+		<p>Sets the integer (<code>int</code>) & decimal (<code>decimal</code>) value increased by one from the previous
+			existing values automatically if value is left blank at the time of insert.</p>
+		<h2>primary_key</h2>
+		<p>Sets the field as primary key for identifying it. Values inserted in it can not be null. Repetition is not
+			allowed. The primary key for a table represents the column or set of columns that you use in your most vital
+			queries. It has an
+			associated index, for fast query performance. Query performance benefits from the NOT NULL optimization,
+			because it
+			cannot include any NULL values.<br><br> If your table is big and important, but does not have an obvious
+			column
+			or
+			set of columns to use as a primary key, you
+			might create a separate column with auto-increment values to use as the primary key. These unique IDs can
+			serve as
+			pointers to corresponding rows in other tables when you join tables using foreign keys.</p>
+		<h2>unique_key</h2>
+		<p>Allows the field to only accept the new values i.e., repetition is not allowed. All primary keys are unique
+			keys but all unique keys are not primary keys.
+		</p>
+		<h2>foreign_key</h2>
+		<p>ZettaSQL supports foreign keys, which permit cross-referencing related data across tables, and foreign key
+			constraints, which
+			help keep the related data consistent.<br><br>
+			A foreign key relationship involves a parent table that holds the initial column values, and a child table
+			with column
+			values that reference the parent column values. A foreign key constraint is defined on the child table.</p>
+		<h2>default</h2>
+		<p>A <code>default</code> value clause in a data type specification explicitly indicates a default value for a
+			column.
+			Examples:</p>
+		<code>...default=Hello...</code><br>
+		<code>...default=1...</code>
+	</div>
+	<div class="container-right">
+		<h1><a id="datatypes" style="border-bottom: 0px;">Datatypes</a></h1>
+		<h2>int</h2>
+		<p>Stores only integer values. <code>Range : 0-4294967295</code></p>
+		<p>When length is not mentioned then the default length is taken. The default length is the maxlength of range.
+		</p>
+		<h2>char & varchar</h2>
+		<p>The CHAR and VARCHAR types are similar, but differ in the way they are stored and retrieved. They also differ
+			in whether trailing spaces are retained.<br><br>
+
+			The CHAR and VARCHAR types are declared with a length that indicates the maximum number of characters you
+			want to store.
+			For example, CHAR(30) can hold up to 30 characters.<br><br>
+
+			The length of a CHAR column is fixed to the length that you declare when you create the table. The length
+			can be any
+			value from 0 to 255. When CHAR values are stored, they are right-padded with spaces to the specified length.
+			When CHAR
+			values are retrieved, trailing spaces are removed.<br><br>
+
+			Values in VARCHAR columns are variable-length strings. The length can be specified as a value from 0 to 255.
+			The effective maximum length of a VARCHAR is subject to the maximum row size(255 bytes, which is shared
+			among all columns) and the character set used.
+			<br><br>
+			For entering the values, quotes need to be given.
+		</p>
+		<h2>blob</h2>
+		<p>This datatype is also used to store the string data. <code>Range : 0-65535.</code></p>
+		<p>When length is not mentioned then the default length is taken. The default length is the maxlength of range.
+			For entering the values, quotes need to be given.
+		</p>
+
+		<h2>date</h2>
+		<p>Stores the date in YYYY-MM-DD format. It gets stored in string type only. For entering the values, quotes
+			need
+			to be given.</p>
+		<h2>decimal</h2>
+		<p>Stores floating point or decimal number.Integer number cannot be store. If it is necessary to store the
+			integer value then it should be entered in decimal
+			format.<br>Example:<br><br>&nbsp;&nbsp;&nbsp;<code>12.0 , 12.45 etc.</code></p>
+		<h2>bool</h2>
+		<p>Stores either <code>true</code> or <code>false</code>.</p>
+	</div>
+	<div class="container-left" style="margin: 2rem;">
+		<h1>Future Scope</h1>
+		<h2>To be included in future</h2>
+		<li><i><b>Adding Multiusers for same computer or other computers in same private network to same server and
+					giving them selected permission to access database.</b></i></li>
+		<li><i><b>Constraints functioning</b></i></li>
+		<li><i><b>Additional options for <code>select</code> command</b></i></li>
+		<li><i><b>Join commands</b></i></li>
+		<h2>Issues</h2>
+		<p>To get the track of issues and bugs, check the <a
+				href="https://github.com/SoumadeepChoudhury/zettasql/issues" target="_blank">issues</a>.</p>
+		<h2>Contact Us</h2>
+		<p>Website : <a href="https://ahens.rf.gd" target=”_blank”>Ahens | An Initiative to Initial</a></p>
+		<p>Email us : <a href="mailto: ahensinitiative@gmail.com" target=”_blank”>Ahens | An Initiative to Initial</a>.
+		</p>
+		<p>Github Link : <a href="https://github.com/SoumadeepChoudhury/zettasql" target=”_blank”>Ahens | An Initiative
+				to
+				Initial</a>.</p>
+	</div>
+</body>
+
+</html>
