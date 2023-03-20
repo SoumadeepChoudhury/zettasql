@@ -130,8 +130,6 @@ dmypy.json
 .DS_STORE
 .log
 .config
-info.log
 databases
 .vscode/extensions.json
 .vscode/launch.json
-Makefile
